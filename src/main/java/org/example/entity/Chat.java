@@ -9,21 +9,16 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "users")
 @Builder
+@EqualsAndHashCode(of = "name")
+@ToString(exclude = "userChats")
 @Entity
-public class Company {
+public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-
     @Builder.Default
-    @OneToMany(mappedBy = "company")
-    private List<User> users = new ArrayList<>();
-
-    public void addUser(User user) {
-        this.users.add(user);
-        user.setCompany(this);
-    }
+    @OneToMany(mappedBy = "chat")
+    private List<UserChat> userChats = new ArrayList<>();
 }

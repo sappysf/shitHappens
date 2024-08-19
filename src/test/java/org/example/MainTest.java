@@ -1,42 +1,39 @@
 package org.example;
 
 import lombok.Cleanup;
-import org.example.entity.Company;
-import org.example.entity.Role;
-import org.example.entity.User;
+import org.example.entity.*;
 import org.example.util.HibernateUtil;
+import org.hibernate.LockMode;
+import org.hibernate.graph.GraphSemantic;
+import org.hibernate.graph.RootGraph;
 import org.junit.jupiter.api.Test;
+
+import javax.persistence.LockModeType;
+import javax.transaction.Transactional;
+import java.util.Map;
 
 
 class MainTest {
 
     @Test
     void check() {
+
+    }
+
+    @Transactional
+    @Test
+    void nProblemsTest() {
         @Cleanup var sessionFactory = HibernateUtil.buildSessionFactory();
         @Cleanup var session = sessionFactory.openSession();
+        @Cleanup var session1 = sessionFactory.openSession();
         session.beginTransaction();
-        var facebook = Company.builder()
-                .name("Facebook")
-                .build();
-        var user = User.builder()
-                .role(Role.ADMIN)
-                .build();
-        facebook.addUser(user);
-        session.save(facebook);
+        session1.beginTransaction();
+        var payment = session.find(Payment.class, 2L);
+        payment.setAmount(payment.getAmount() + 20);
+        var payment1 = session1.find(Payment.class, 2L);
+        payment1.setAmount(payment1.getAmount() + 20);
         session.getTransaction().commit();
+        session1.getTransaction().commit();
     }
 
-    @Test
-    void lazy() {
-        Company company = null;
-        try (var sessionFactory = HibernateUtil.buildSessionFactory();
-             var session = sessionFactory.openSession()) {
-            session.beginTransaction();
-            company = session.get(Company.class, 1L);
-            session.getTransaction().commit();
-        }
-        var users = company.getUsers();
-        users.forEach(System.out::println);
-
-    }
 }
